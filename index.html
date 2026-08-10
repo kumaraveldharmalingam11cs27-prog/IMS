@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Provigent Inventory Suite</title>
+    <style>
+      :root {
+        --bg: #0b1022;
+        --panel: #141a36;
+        --panel-soft: #1c2450;
+        --line: #2b3567;
+        --text: #edf1ff;
+        --muted: #a0add8;
+        --accent: #24b7ff;
+        --accent2: #4f7dff;
+        --ok: #22c55e;
+        --warn: #f59e0b;
+        --danger: #ef4444;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background: radial-gradient(circle at 20% 20%, #1d2657 0%, #0a1023 48%, #060913 100%);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .login-wrap {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 16px;
+      }
+
+      .login-card {
+        width: 100%;
+        max-width: 460px;
+        background: linear-gradient(180deg, #141a3a 0%, #0f1430 100%);
+        border: 1px solid #323d73;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 24px 40px rgba(0, 0, 0, 0.35);
+      }
+
+      .login-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 8px;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid #34417a;
+        background: #101742;
+        color: var(--text);
+        font: inherit;
+      }
+
+      .field {
+        margin-top: 10px;
+      }
+
+      .btn {
+        border: 0;
+        cursor: pointer;
+        font-weight: 600;
+        background: linear-gradient(180deg, #2e73ff 0%, #1f54d3 100%);
+      }
+
+      .btn.alt {
+        background: #2b335f;
+      }
+
+      .btn.warn {
+        background: #a12847;
+      }
+
+      .shell {
+        max-width: 1380px;
+        margin: 12px auto;
+        padding: 10px;
+        display: grid;
+        grid-template-columns: 230px 1fr;
+        gap: 10px;
+      }
+
+      .nav {
+        background: linear-gradient(180deg, #151b3d 0%, #0f1431 100%);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px;
+        height: calc(100vh - 24px);
+        position: sticky;
+        top: 12px;
+      }
+
+      .brand {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+
+      .nav button {
+        text-align: left;
+        margin-bottom: 8px;
+      }
+
+      .nav button.active {
+        border: 1px solid #4f7dff;
+        background: #1d2a60;
+      }
+
+      .main {
+        background: linear-gradient(180deg, #111634 0%, #0c1129 100%);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px;
+        min-height: calc(100vh - 24px);
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px;
+      }
+
+      .title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .kpi-value {
+        font-size: 34px;
+        font-weight: 700;
+      }
+
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+
+      .table th,
+      .table td {
+        text-align: left;
+        padding: 7px 8px;
+        border-bottom: 1px solid #2b3568;
+      }
+
+      .table th {
+        color: #bec8fb;
+        font-size: 12px;
+      }
+
+      .pill {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .good {
+        background: rgba(34, 197, 94, 0.2);
+        color: #93ffb5;
+      }
+
+      .warning {
+        background: rgba(245, 158, 11, 0.2);
+        color: #ffd690;
+      }
+
+      .critical {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ff9f9f;
+      }
+
+      .toolbar {
+        display: grid;
+        grid-template-columns: 1fr 170px 120px;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .pager {
+        margin-top: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .row {
+        display: grid;
+        gap: 10px;
+      }
+
+      .two {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .chart {
+        width: 100%;
+        height: 130px;
+      }
+
+      .chart-wrap {
+        background: #121842;
+        border: 1px solid #2a3364;
+        border-radius: 8px;
+        padding: 8px;
+      }
+
+      @media (max-width: 1100px) {
+        .shell {
+          grid-template-columns: 1fr;
+        }
+
+        .nav {
+          position: static;
+          height: auto;
+        }
+
+        .kpi-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .two,
+        .three {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section id="loginView" class="login-wrap">
+      <div class="login-card">
+        <h1 class="login-title">Provigent Inventory Suite</h1>
+        <p class="muted">Sign in to manage stock, sales, and reports.</p>
+        <div class="field"><input id="loginUsername" value="admin" placeholder="Username" /></div>
+        <div class="field"><input id="loginPassword" value="admin123" placeholder="Password" type="password" /></div>
+        <div class="field"><button class="btn" id="loginButton">Sign in</button></div>
+        <p class="muted" id="loginMessage">Demo credentials are pre-filled.</p>
+      </div>
+    </section>
+
+    <section id="appView" class="shell hidden">
+      <aside class="nav">
+        <div class="brand">Inventory Suite</div>
+        <button class="btn alt active" data-page="dashboardPage">Dashboard</button>
+        <button class="btn alt" data-page="inventoryPage">Inventory Management</button>
+        <button class="btn alt" data-page="stockListPage">Stock List</button>
+        <button class="btn alt" data-page="alertsPage">Alerts</button>
+        <button class="btn alt" data-page="stockCreatePage">New Stock Creation</button>
+        <button class="btn alt" data-page="salesPage">Sales</button>
+        <button class="btn alt" data-page="salesReportPage">Sales Report</button>
+        <button class="btn warn" id="logoutButton" style="margin-top: 12px">Sign out</button>
+      </aside>
+
+      <main class="main">
+        <div class="topbar">
+          <div id="pageTitle" style="font-size: 22px; font-weight: 700">Dashboard</div>
+          <div id="statusText" class="muted">Connecting...</div>
+        </div>
+
+        <section id="dashboardPage" class="page">
+          <div class="kpi-grid">
+            <div class="panel"><div class="muted">Total items</div><div class="kpi-value" id="kpiTotalItems">0</div></div>
+            <div class="panel"><div class="muted">Low stock alerts</div><div class="kpi-value" id="kpiLowStock">0</div></div>
+            <div class="panel"><div class="muted">Inventory value</div><div class="kpi-value" id="kpiInventoryValue">$0</div></div>
+            <div class="panel"><div class="muted">Total sales value</div><div class="kpi-value" id="kpiSalesValue">$0</div></div>
+          </div>
+          <div class="row two" style="margin-top: 10px">
+            <div class="panel">
+              <div class="title">Low-stock trend</div>
+              <div class="chart-wrap">
+                <svg class="chart" viewBox="0 0 360 130">
+                  <polyline id="lowStockTrendLine" fill="none" stroke="#1cc8ff" stroke-width="3" points=""></polyline>
+                  <line x1="0" y1="116" x2="360" y2="116" stroke="#304078" stroke-width="1"></line>
+                </svg>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="title">Stock value by category</div>
+              <div class="chart-wrap">
+                <svg id="categoryBarChart" class="chart" viewBox="0 0 360 130"></svg>
+              </div>
+              <div class="muted" id="categoryLegend" style="margin-top: 8px"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="inventoryPage" class="page hidden">
+          <div class="panel">
+            <div class="title">Inventory list</div>
+            <div class="toolbar">
+              <input id="searchInput" placeholder="Search by name or SKU" />
+              <select id="statusFilter">
+                <option value="all">All statuses</option>
+                <option value="good">Good</option>
+                <option value="warning">Warning</option>
+                <option value="critical">Critical</option>
+              </select>
+              <select id="pageSizeSelect">
+                <option value="10">10 rows</option>
+                <option value="15" selected>15 rows</option>
+                <option value="25">25 rows</option>
+                <option value="50">50 rows</option>
+              </select>
+            </div>
+            <table class="table">
+              <thead>
+                <tr><th>Item</th><th>SKU</th><th>Qty</th><th>Unit cost</th><th>Status</th><th>Location</th><th>Action</th></tr>
+              </thead>
+              <tbody id="inventoryTableBody"></tbody>
+            </table>
+            <div class="pager">
+              <div class="muted" id="pageInfo">Page 1 of 1</div>
+              <div style="display: flex; gap: 8px">
+                <button class="btn alt" id="prevPageBtn" style="width: 90px">Prev</button>
+                <button class="btn alt" id="nextPageBtn" style="width: 90px">Next</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top: 10px">
+            <div class="title">Update selected stock details</div>
+            <div class="muted" id="selectedItemText">Select an item from the table.</div>
+            <div class="row three" style="margin-top: 8px">
+              <input id="fName" placeholder="Name" />
+              <input id="fSku" placeholder="SKU" />
+              <input id="fQty" type="number" placeholder="Quantity" />
+              <input id="fUnitCost" type="number" step="0.01" placeholder="Unit cost" />
+              <input id="fMin" type="number" placeholder="Min quantity" />
+              <input id="fMax" type="number" placeholder="Max quantity" />
+              <input id="fLocation" placeholder="Location" />
+              <input id="fUnit" placeholder="Unit" />
+              <input id="adjQty" type="number" placeholder="Adjust qty (+/-)" />
+              <input id="adjReason" placeholder="Adjustment reason" />
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 8px">
+              <button class="btn" id="updateItemBtn" style="width: 140px">Update item</button>
+              <button class="btn" id="adjustStockBtn" style="width: 140px">Adjust stock</button>
+              <button class="btn warn" id="deleteItemBtn" style="width: 140px">Delete item</button>
+              <button class="btn alt" id="clearSelectionBtn" style="width: 120px">Clear</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="stockListPage" class="page hidden">
+          <div class="panel">
+            <div class="title">Stock available list</div>
+            <div class="toolbar">
+              <input id="stockListSearch" placeholder="Search stock by item name or SKU" />
+              <select id="stockListAvailabilityFilter">
+                <option value="all">All items</option>
+                <option value="available">Available only</option>
+                <option value="out">Out of stock only</option>
+              </select>
+              <select id="stockListSortBy">
+                <option value="name">Sort: Name</option>
+                <option value="qty_desc">Sort: Qty high to low</option>
+                <option value="qty_asc">Sort: Qty low to high</option>
+              </select>
+            </div>
+            <div class="muted" id="stockListSummary" style="margin-bottom: 8px">Loading stock list...</div>
+            <table class="table">
+              <thead>
+                <tr><th>Item</th><th>SKU</th><th>Stock available</th><th>Quantity</th><th>Unit</th><th>Location</th></tr>
+              </thead>
+              <tbody id="stockListBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="alertsPage" class="page hidden">
+          <div class="panel">
+            <div class="title">Low stock alerts (Qty &lt; 25)</div>
+            <div class="muted" id="alertsSummary">Checking low-stock items...</div>
+            <table class="table" style="margin-top: 8px">
+              <thead>
+                <tr><th>Item</th><th>SKU</th><th>Quantity</th><th>Min quantity</th><th>Status</th><th>Location</th></tr>
+              </thead>
+              <tbody id="alertsTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="stockCreatePage" class="page hidden">
+          <div class="panel">
+            <div class="title">Create new stock item</div>
+            <div class="row three">
+              <input id="newName" placeholder="Name" />
+              <input id="newSku" placeholder="SKU" />
+              <input id="newQty" type="number" placeholder="Quantity" />
+              <input id="newCost" type="number" step="0.01" placeholder="Unit cost" />
+              <input id="newMin" type="number" placeholder="Min quantity" />
+              <input id="newMax" type="number" placeholder="Max quantity" />
+              <input id="newLocation" placeholder="Location" />
+              <input id="newUnit" placeholder="Unit" />
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 8px">
+              <button class="btn" id="createStockBtn" style="width: 180px">Create stock item</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="salesPage" class="page hidden">
+          <div class="panel">
+            <div class="title">New sale transaction</div>
+            <div class="row three">
+              <select id="saleItemSelect"></select>
+              <input id="saleQty" type="number" min="1" placeholder="Quantity sold" />
+              <input id="saleUnitPrice" type="number" step="0.01" placeholder="Unit price" />
+              <input id="saleCustomer" placeholder="Customer name" />
+              <input id="saleRef" placeholder="Reference / invoice" />
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 8px">
+              <button class="btn" id="createSaleBtn" style="width: 180px">Record sale</button>
+            </div>
+            <div class="muted" id="saleMessage" style="margin-top: 8px"></div>
+          </div>
+
+          <div class="panel" style="margin-top: 10px">
+            <div class="title">Recent sales</div>
+            <table class="table">
+              <thead><tr><th>Date</th><th>Item</th><th>Qty</th><th>Unit price</th><th>Total</th><th>Customer</th><th>Ref</th></tr></thead>
+              <tbody id="recentSalesBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="salesReportPage" class="page hidden">
+          <div class="panel">
+            <div class="title">Sales report</div>
+            <div class="row three">
+              <input id="reportFrom" type="date" />
+              <input id="reportTo" type="date" />
+              <button class="btn" id="applyReportFilterBtn">Apply report filter</button>
+            </div>
+
+            <div class="kpi-grid" style="margin-top: 10px">
+              <div class="panel"><div class="muted">Transactions</div><div class="kpi-value" id="rTransactions">0</div></div>
+              <div class="panel"><div class="muted">Units sold</div><div class="kpi-value" id="rUnits">0</div></div>
+              <div class="panel"><div class="muted">Sales value</div><div class="kpi-value" id="rValue">$0</div></div>
+              <div class="panel"><div class="muted">Avg ticket</div><div class="kpi-value" id="rAvg">$0</div></div>
+            </div>
+
+            <div class="row two" style="margin-top: 10px">
+              <div class="chart-wrap">
+                <div class="muted">Daily sales value trend</div>
+                <svg class="chart" viewBox="0 0 360 130">
+                  <polyline id="salesTrendLine" fill="none" stroke="#39d98a" stroke-width="3" points=""></polyline>
+                  <line x1="0" y1="116" x2="360" y2="116" stroke="#304078" stroke-width="1"></line>
+                </svg>
+              </div>
+              <div class="chart-wrap">
+                <div class="muted">Top sold items by qty</div>
+                <svg id="topItemsBarChart" class="chart" viewBox="0 0 360 130"></svg>
+              </div>
+            </div>
+
+            <div style="margin-top: 10px">
+              <table class="table">
+                <thead><tr><th>Date</th><th>Item</th><th>Qty</th><th>Unit price</th><th>Total</th><th>Customer</th><th>Ref</th></tr></thead>
+                <tbody id="reportTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </section>
+
+    <script>
+      const API_ROOT = "http://127.0.0.1:5000/api";
+      const SALES_KEY = "provigent_sales_records_v1";
+      let token = localStorage.getItem("access_token") || null;
+      let items = [];
+      let filteredItems = [];
+      let selectedItemId = null;
+      let currentPage = 1;
+      let pageSize = 15;
+      let currentUser = null;
+
+      function formatCurrency(value) {
+        return "$" + Number(value || 0).toLocaleString(undefined, { maximumFractionDigits: 2 });
+      }
+
+      function salesRecords() {
+        return JSON.parse(localStorage.getItem(SALES_KEY) || "[]");
+      }
+
+      function saveSalesRecords(records) {
+        localStorage.setItem(SALES_KEY, JSON.stringify(records));
+      }
+
+      function authHeaders() {
+        const headers = { "Content-Type": "application/json" };
+        if (token) headers.Authorization = "Bearer " + token;
+        return headers;
+      }
+
+      async function apiGet(path) {
+        const response = await fetch(API_ROOT + path, { headers: authHeaders() });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Request failed");
+        return data;
+      }
+
+      async function apiMutate(path, method, body) {
+        const response = await fetch(API_ROOT + path, {
+          method,
+          headers: authHeaders(),
+          body: body ? JSON.stringify(body) : undefined
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Request failed");
+        return data;
+      }
+
+      function setStatus(text) {
+        document.getElementById("statusText").textContent = text;
+      }
+
+      function setPage(pageId) {
+        document.querySelectorAll(".page").forEach(page => page.classList.add("hidden"));
+        document.getElementById(pageId).classList.remove("hidden");
+        document.querySelectorAll(".nav button[data-page]").forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.page === pageId);
+        });
+        const titleMap = {
+          dashboardPage: "Dashboard",
+          inventoryPage: "Inventory Management",
+          stockListPage: "Stock List",
+          alertsPage: "Alerts",
+          stockCreatePage: "New Stock Creation",
+          salesPage: "Sales",
+          salesReportPage: "Sales Report"
+        };
+        document.getElementById("pageTitle").textContent = titleMap[pageId] || "Inventory Suite";
+      }
+
+      function applyFilters() {
+        const query = (document.getElementById("searchInput").value || "").trim().toLowerCase();
+        const status = document.getElementById("statusFilter").value;
+        filteredItems = items.filter(item => {
+          const name = (item.name || "").toLowerCase();
+          const sku = (item.sku || "").toLowerCase();
+          const queryMatch = !query || name.includes(query) || sku.includes(query);
+          const statusMatch = status === "all" || item.status === status;
+          return queryMatch && statusMatch;
+        });
+      }
+
+      function pagedRows() {
+        const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
+        if (currentPage > totalPages) currentPage = totalPages;
+        const start = (currentPage - 1) * pageSize;
+        return { rows: filteredItems.slice(start, start + pageSize), totalPages };
+      }
+
+      function renderInventoryTable() {
+        const tbody = document.getElementById("inventoryTableBody");
+        const { rows, totalPages } = pagedRows();
+        tbody.innerHTML = rows.map(item => `
+          <tr>
+            <td>${item.name}</td>
+            <td>${item.sku}</td>
+            <td>${item.current_quantity}</td>
+            <td>${formatCurrency(item.unit_cost)}</td>
+            <td><span class="pill ${item.status}">${item.status}</span></td>
+            <td>${item.location || "-"}</td>
+            <td><button class="btn alt" style="width:80px" onclick="selectItem(${item.id})">Select</button></td>
+          </tr>
+        `).join("");
+        document.getElementById("pageInfo").textContent = `Page ${currentPage} of ${totalPages} (${filteredItems.length} items)`;
+        document.getElementById("prevPageBtn").disabled = currentPage <= 1;
+        document.getElementById("nextPageBtn").disabled = currentPage >= totalPages;
+      }
+
+      function renderStockList() {
+        const query = (document.getElementById("stockListSearch")?.value || "").trim().toLowerCase();
+        const availability = document.getElementById("stockListAvailabilityFilter")?.value || "all";
+        const sortBy = document.getElementById("stockListSortBy")?.value || "name";
+
+        let rows = items.filter(item => {
+          const name = (item.name || "").toLowerCase();
+          const sku = (item.sku || "").toLowerCase();
+          const matchQuery = !query || name.includes(query) || sku.includes(query);
+          if (!matchQuery) return false;
+          if (availability === "available") return (item.current_quantity || 0) > 0;
+          if (availability === "out") return (item.current_quantity || 0) <= 0;
+          return true;
+        });
+
+        if (sortBy === "qty_desc") {
+          rows.sort((a, b) => (b.current_quantity || 0) - (a.current_quantity || 0));
+        } else if (sortBy === "qty_asc") {
+          rows.sort((a, b) => (a.current_quantity || 0) - (b.current_quantity || 0));
+        } else {
+          rows.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+        }
+
+        const totalQuantity = rows.reduce((sum, row) => sum + (row.current_quantity || 0), 0);
+        const availableCount = rows.filter(row => (row.current_quantity || 0) > 0).length;
+
+        document.getElementById("stockListSummary").textContent =
+          `Items shown: ${rows.length} | Available items: ${availableCount} | Total quantity: ${totalQuantity}`;
+
+        document.getElementById("stockListBody").innerHTML = rows.map(row => {
+          const inStock = (row.current_quantity || 0) > 0;
+          return `
+            <tr>
+              <td>${row.name}</td>
+              <td>${row.sku}</td>
+              <td>${inStock ? '<span class="pill good">Available</span>' : '<span class="pill critical">Out</span>'}</td>
+              <td>${row.current_quantity || 0}</td>
+              <td>${row.unit || "piece"}</td>
+              <td>${row.location || "-"}</td>
+            </tr>
+          `;
+        }).join("");
+      }
+
+      function renderAlertsPage() {
+        const lowStockItems = items
+          .filter(item => (item.current_quantity || 0) < 25)
+          .sort((a, b) => (a.current_quantity || 0) - (b.current_quantity || 0));
+
+        const criticalCount = lowStockItems.filter(item => (item.current_quantity || 0) === 0).length;
+        document.getElementById("alertsSummary").textContent =
+          `Total low-stock alerts: ${lowStockItems.length} | Out-of-stock: ${criticalCount}`;
+
+        document.getElementById("alertsTableBody").innerHTML = lowStockItems.map(item => `
+          <tr>
+            <td>${item.name}</td>
+            <td>${item.sku}</td>
+            <td>${item.current_quantity || 0}</td>
+            <td>${item.min_quantity || 0}</td>
+            <td><span class="pill ${item.status}">${item.status}</span></td>
+            <td>${item.location || "-"}</td>
+          </tr>
+        `).join("");
+      }
+
+      function renderDashboard(stats) {
+        const sales = salesRecords();
+        const salesValue = sales.reduce((sum, row) => sum + row.total, 0);
+        document.getElementById("kpiTotalItems").textContent = stats.total_items || 0;
+        document.getElementById("kpiLowStock").textContent = stats.low_stock_count || 0;
+        document.getElementById("kpiInventoryValue").textContent = formatCurrency(stats.total_inventory_value);
+        document.getElementById("kpiSalesValue").textContent = formatCurrency(salesValue);
+
+        const lowSeries = [0.62, 0.72, 0.69, 0.78, 0.74, 0.81].map(f => Math.max(1, Math.round((stats.low_stock_count || 1) * f)));
+        const maxLow = Math.max(...lowSeries, 1);
+        const lowPoints = lowSeries.map((v, i) => `${22 + i * 62},${112 - (v / maxLow) * 84}`).join(" ");
+        document.getElementById("lowStockTrendLine").setAttribute("points", lowPoints);
+
+        const catMap = new Map();
+        items.forEach(item => {
+          const cat = item.category || "Unassigned";
+          const value = (item.current_quantity || 0) * (item.unit_cost || 0);
+          catMap.set(cat, (catMap.get(cat) || 0) + value);
+        });
+        const top = Array.from(catMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, 6);
+        const maxVal = Math.max(1, ...top.map(v => v[1]));
+        const colors = ["#1cc8ff", "#5dd39e", "#fbbf24", "#fb7185", "#c084fc", "#60a5fa"];
+        const svg = document.getElementById("categoryBarChart");
+        svg.innerHTML = top.map((entry, i) => {
+          const h = Math.max(6, (entry[1] / maxVal) * 92);
+          const x = 14 + i * 56;
+          const y = 110 - h;
+          return `<rect x="${x}" y="${y}" width="34" height="${h}" rx="4" fill="${colors[i % colors.length]}"></rect>`;
+        }).join("") + '<line x1="0" y1="111" x2="360" y2="111" stroke="#304078" stroke-width="1"></line>';
+        document.getElementById("categoryLegend").textContent = top.map(x => `${x[0]}: ${formatCurrency(x[1])}`).join("  |  ");
+      }
+
+      function bindInventorySelectors() {
+        document.getElementById("searchInput").addEventListener("input", () => {
+          currentPage = 1;
+          applyFilters();
+          renderInventoryTable();
+        });
+        document.getElementById("statusFilter").addEventListener("change", () => {
+          currentPage = 1;
+          applyFilters();
+          renderInventoryTable();
+        });
+        document.getElementById("pageSizeSelect").addEventListener("change", () => {
+          pageSize = Number(document.getElementById("pageSizeSelect").value);
+          currentPage = 1;
+          renderInventoryTable();
+        });
+        document.getElementById("prevPageBtn").addEventListener("click", () => {
+          if (currentPage > 1) {
+            currentPage -= 1;
+            renderInventoryTable();
+          }
+        });
+        document.getElementById("nextPageBtn").addEventListener("click", () => {
+          const pages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
+          if (currentPage < pages) {
+            currentPage += 1;
+            renderInventoryTable();
+          }
+        });
+      }
+
+      function bindStockListControls() {
+        document.getElementById("stockListSearch").addEventListener("input", renderStockList);
+        document.getElementById("stockListAvailabilityFilter").addEventListener("change", renderStockList);
+        document.getElementById("stockListSortBy").addEventListener("change", renderStockList);
+      }
+
+      function selectItem(id) {
+        const item = items.find(x => x.id === id);
+        if (!item) return;
+        selectedItemId = id;
+        document.getElementById("selectedItemText").textContent = `Selected: ${item.name} (ID ${item.id})`;
+        document.getElementById("fName").value = item.name || "";
+        document.getElementById("fSku").value = item.sku || "";
+        document.getElementById("fQty").value = item.current_quantity || 0;
+        document.getElementById("fUnitCost").value = item.unit_cost || 0;
+        document.getElementById("fMin").value = item.min_quantity || 0;
+        document.getElementById("fMax").value = item.max_quantity || 0;
+        document.getElementById("fLocation").value = item.location || "";
+        document.getElementById("fUnit").value = item.unit || "piece";
+      }
+
+      function clearSelection() {
+        selectedItemId = null;
+        document.getElementById("selectedItemText").textContent = "Select an item from the table.";
+        ["fName", "fSku", "fQty", "fUnitCost", "fMin", "fMax", "fLocation", "fUnit", "adjQty", "adjReason"].forEach(id => {
+          document.getElementById(id).value = "";
+        });
+      }
+
+      async function updateSelectedItem() {
+        if (!selectedItemId) return alert("Select an item first.");
+        const payload = {
+          name: document.getElementById("fName").value,
+          sku: document.getElementById("fSku").value,
+          current_quantity: Number(document.getElementById("fQty").value || 0),
+          unit_cost: Number(document.getElementById("fUnitCost").value || 0),
+          min_quantity: Number(document.getElementById("fMin").value || 0),
+          max_quantity: Number(document.getElementById("fMax").value || 0),
+          location: document.getElementById("fLocation").value,
+          unit: document.getElementById("fUnit").value || "piece"
+        };
+        await apiMutate(`/inventory/${selectedItemId}`, "PUT", payload);
+        await refreshAll("Item updated");
+      }
+
+      async function adjustSelectedStock() {
+        if (!selectedItemId) return alert("Select an item first.");
+        const qty = Number(document.getElementById("adjQty").value || 0);
+        if (!qty) return alert("Enter adjustment quantity.");
+        const reason = document.getElementById("adjReason").value || "manual adjustment";
+        await apiMutate("/stock/adjust", "POST", {
+          item_id: selectedItemId,
+          quantity: qty,
+          reason,
+          notes: "Adjusted from inventory management"
+        });
+        document.getElementById("adjQty").value = "";
+        document.getElementById("adjReason").value = "";
+        await refreshAll("Stock adjusted");
+      }
+
+      async function deleteSelectedItem() {
+        if (!selectedItemId) return alert("Select an item first.");
+        if (!confirm("Delete this item permanently?")) return;
+        await apiMutate(`/inventory/${selectedItemId}`, "DELETE");
+        clearSelection();
+        await refreshAll("Item deleted");
+      }
+
+      async function createStockItem() {
+        const payload = {
+          name: document.getElementById("newName").value,
+          sku: document.getElementById("newSku").value,
+          current_quantity: Number(document.getElementById("newQty").value || 0),
+          unit_cost: Number(document.getElementById("newCost").value || 0),
+          min_quantity: Number(document.getElementById("newMin").value || 0),
+          max_quantity: Number(document.getElementById("newMax").value || 0),
+          location: document.getElementById("newLocation").value,
+          unit: document.getElementById("newUnit").value || "piece"
+        };
+        if (!payload.name || !payload.sku) return alert("Name and SKU are required.");
+        await apiMutate("/inventory", "POST", payload);
+        ["newName", "newSku", "newQty", "newCost", "newMin", "newMax", "newLocation", "newUnit"].forEach(id => {
+          document.getElementById(id).value = "";
+        });
+        await refreshAll("New stock created");
+      }
+
+      function populateSaleItems() {
+        const select = document.getElementById("saleItemSelect");
+        select.innerHTML = items.map(item => `<option value="${item.id}">${item.name} (${item.sku}) - Qty ${item.current_quantity}</option>`).join("");
+      }
+
+      async function createSale() {
+        const itemId = Number(document.getElementById("saleItemSelect").value);
+        const qty = Number(document.getElementById("saleQty").value || 0);
+        const unitPrice = Number(document.getElementById("saleUnitPrice").value || 0);
+        const customer = document.getElementById("saleCustomer").value || "Walk-in";
+        const ref = document.getElementById("saleRef").value || "-";
+        const item = items.find(x => x.id === itemId);
+        if (!item) return alert("Select a valid item.");
+        if (qty <= 0) return alert("Quantity must be greater than 0.");
+        if (qty > item.current_quantity) return alert("Insufficient stock for this sale.");
+        if (unitPrice <= 0) return alert("Unit price must be greater than 0.");
+
+        await apiMutate("/stock/adjust", "POST", {
+          item_id: itemId,
+          quantity: -qty,
+          reason: "sale",
+          notes: `Sale ${ref}`
+        });
+
+        const record = {
+          id: Date.now(),
+          date: new Date().toISOString(),
+          item_id: itemId,
+          item_name: item.name,
+          sku: item.sku,
+          qty,
+          unit_price: unitPrice,
+          total: qty * unitPrice,
+          customer,
+          reference: ref,
+          user: currentUser || "admin"
+        };
+        const records = salesRecords();
+        records.unshift(record);
+        saveSalesRecords(records);
+
+        document.getElementById("saleQty").value = "";
+        document.getElementById("saleUnitPrice").value = "";
+        document.getElementById("saleCustomer").value = "";
+        document.getElementById("saleRef").value = "";
+        document.getElementById("saleMessage").textContent = `Sale recorded: ${record.item_name} x ${qty}`;
+        await refreshAll("Sale posted");
+      }
+
+      function renderRecentSales() {
+        const rows = salesRecords().slice(0, 10);
+        document.getElementById("recentSalesBody").innerHTML = rows.map(row => `
+          <tr>
+            <td>${new Date(row.date).toLocaleString()}</td>
+            <td>${row.item_name}</td>
+            <td>${row.qty}</td>
+            <td>${formatCurrency(row.unit_price)}</td>
+            <td>${formatCurrency(row.total)}</td>
+            <td>${row.customer}</td>
+            <td>${row.reference}</td>
+          </tr>
+        `).join("");
+      }
+
+      function filterReportRecords() {
+        const from = document.getElementById("reportFrom").value;
+        const to = document.getElementById("reportTo").value;
+        const start = from ? new Date(from + "T00:00:00").getTime() : 0;
+        const end = to ? new Date(to + "T23:59:59").getTime() : Number.MAX_SAFE_INTEGER;
+        return salesRecords().filter(row => {
+          const ts = new Date(row.date).getTime();
+          return ts >= start && ts <= end;
+        });
+      }
+
+      function renderSalesReport() {
+        const rows = filterReportRecords();
+        const tx = rows.length;
+        const units = rows.reduce((sum, row) => sum + row.qty, 0);
+        const value = rows.reduce((sum, row) => sum + row.total, 0);
+        const avg = tx ? value / tx : 0;
+
+        document.getElementById("rTransactions").textContent = tx;
+        document.getElementById("rUnits").textContent = units;
+        document.getElementById("rValue").textContent = formatCurrency(value);
+        document.getElementById("rAvg").textContent = formatCurrency(avg);
+
+        document.getElementById("reportTableBody").innerHTML = rows.map(row => `
+          <tr>
+            <td>${new Date(row.date).toLocaleString()}</td>
+            <td>${row.item_name}</td>
+            <td>${row.qty}</td>
+            <td>${formatCurrency(row.unit_price)}</td>
+            <td>${formatCurrency(row.total)}</td>
+            <td>${row.customer}</td>
+            <td>${row.reference}</td>
+          </tr>
+        `).join("");
+
+        const byDay = new Map();
+        rows.forEach(row => {
+          const day = row.date.slice(0, 10);
+          byDay.set(day, (byDay.get(day) || 0) + row.total);
+        });
+        const dayEntries = Array.from(byDay.entries()).sort((a, b) => a[0].localeCompare(b[0])).slice(-7);
+        const maxDay = Math.max(1, ...dayEntries.map(x => x[1]));
+        const trendPoints = dayEntries.map((entry, i) => `${24 + i * 48},${116 - (entry[1] / maxDay) * 84}`).join(" ");
+        document.getElementById("salesTrendLine").setAttribute("points", trendPoints || "24,116");
+
+        const byItem = new Map();
+        rows.forEach(row => {
+          byItem.set(row.item_name, (byItem.get(row.item_name) || 0) + row.qty);
+        });
+        const top = Array.from(byItem.entries()).sort((a, b) => b[1] - a[1]).slice(0, 6);
+        const maxQty = Math.max(1, ...top.map(x => x[1]));
+        const colors = ["#38bdf8", "#4ade80", "#fbbf24", "#fb7185", "#a78bfa", "#60a5fa"];
+        const svg = document.getElementById("topItemsBarChart");
+        svg.innerHTML = top.map((entry, i) => {
+          const h = Math.max(6, (entry[1] / maxQty) * 92);
+          const x = 14 + i * 56;
+          const y = 110 - h;
+          return `<rect x="${x}" y="${y}" width="34" height="${h}" rx="4" fill="${colors[i % colors.length]}"></rect>`;
+        }).join("") + '<line x1="0" y1="111" x2="360" y2="111" stroke="#304078" stroke-width="1"></line>';
+      }
+
+      async function refreshAll(statusMessage) {
+        setStatus(statusMessage || "Refreshing data...");
+        const [stats, inventory] = await Promise.all([
+          apiGet("/dashboard/stats"),
+          apiGet("/inventory?per_page=500")
+        ]);
+        items = inventory.items || [];
+        applyFilters();
+        renderInventoryTable();
+        renderStockList();
+        renderAlertsPage();
+        renderDashboard(stats);
+        populateSaleItems();
+        renderRecentSales();
+        renderSalesReport();
+        setStatus("Connected as " + (currentUser || "user"));
+      }
+
+      async function doLogin() {
+        const username = document.getElementById("loginUsername").value;
+        const password = document.getElementById("loginPassword").value;
+        const response = await fetch(API_ROOT + "/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Login failed");
+        token = data.access_token;
+        currentUser = data.user?.username || username;
+        localStorage.setItem("access_token", token);
+      }
+
+      function doLogout() {
+        token = null;
+        currentUser = null;
+        localStorage.removeItem("access_token");
+        document.getElementById("appView").classList.add("hidden");
+        document.getElementById("loginView").classList.remove("hidden");
+      }
+
+      function bindHandlers() {
+        document.getElementById("loginButton").addEventListener("click", async () => {
+          try {
+            document.getElementById("loginMessage").textContent = "Signing in...";
+            await doLogin();
+            document.getElementById("loginView").classList.add("hidden");
+            document.getElementById("appView").classList.remove("hidden");
+            await refreshAll("Login successful");
+          } catch (error) {
+            document.getElementById("loginMessage").textContent = error.message;
+          }
+        });
+
+        document.getElementById("logoutButton").addEventListener("click", doLogout);
+        document.querySelectorAll(".nav button[data-page]").forEach(btn => {
+          btn.addEventListener("click", () => setPage(btn.dataset.page));
+        });
+
+        bindInventorySelectors();
+        bindStockListControls();
+        document.getElementById("updateItemBtn").addEventListener("click", async () => {
+          try { await updateSelectedItem(); } catch (error) { alert(error.message); }
+        });
+        document.getElementById("adjustStockBtn").addEventListener("click", async () => {
+          try { await adjustSelectedStock(); } catch (error) { alert(error.message); }
+        });
+        document.getElementById("deleteItemBtn").addEventListener("click", async () => {
+          try { await deleteSelectedItem(); } catch (error) { alert(error.message); }
+        });
+        document.getElementById("clearSelectionBtn").addEventListener("click", clearSelection);
+
+        document.getElementById("createStockBtn").addEventListener("click", async () => {
+          try { await createStockItem(); } catch (error) { alert(error.message); }
+        });
+
+        document.getElementById("createSaleBtn").addEventListener("click", async () => {
+          try { await createSale(); } catch (error) { alert(error.message); }
+        });
+
+        document.getElementById("applyReportFilterBtn").addEventListener("click", renderSalesReport);
+      }
+
+      async function boot() {
+        bindHandlers();
+        if (token) {
+          document.getElementById("loginView").classList.add("hidden");
+          document.getElementById("appView").classList.remove("hidden");
+          try {
+            const me = await apiGet("").catch(() => null);
+            currentUser = me ? "admin" : "user";
+            await refreshAll("Session restored");
+          } catch {
+            doLogout();
+          }
+        }
+      }
+
+      boot();
+      window.selectItem = selectItem;
+    </script>
+  </body>
+</html>
