@@ -121,18 +121,74 @@ def create_app(config_name=None):
     
     # ==================== AUTHENTICATION ROUTES ====================
     
-    @app.route('/api/auth/login', methods=['POST'])
+    @app.route('/api/auth/login', methods=['POST', 'OPTIONS'])
     def login():
         """User login endpoint"""
+        if request.method == 'OPTIONS':
+            return '', 204
+            
         try:
-            data = request.get_json()
+            import json
             
-            if not data or not data.get('username') or not data.get('password'):
-                return jsonify({'error': 'Missing credentials'}), 400
+            # Debug: Log all request details
+            print(f"\n=== LOGIN REQUEST DEBUG ===")
+            print(f"Content-Type: {request.content_type}")
+            print(f"Is JSON: {request.is_json}")
+            print(f"Method: {request.method}")
+            print(f"Headers: {dict(request.headers)}")
             
-            user = User.query.filter_by(username=data['username']).first()
+            # Get raw body
+            raw_body = request.get_data(as_text=True)
+            print(f"Raw body: {raw_body}")
+            print(f"Raw body length: {len(raw_body)}")
             
-            if not user or not user.check_password(data['password']):
+            username = None
+            password = None
+            
+            # Try to get JSON data
+            if request.is_json:
+                data = request.get_json(silent=True)
+                print(f"get_json() result: {data}")
+                if data and isinstance(data, dict):
+                    username = data.get('username')
+                    password = data.get('password')
+                    print(f"Extracted from get_json: username={username}, password={password}")
+            
+            # If that didn't work, try parsing raw body
+            if not username or not password:
+                try:
+                    if raw_body:
+                        print(f"Attempting to parse raw body as JSON...")
+                        data = json.loads(raw_body)
+                        print(f"Parsed data: {data}")
+                        if isinstance(data, dict):
+                            username = data.get('username') or username
+                            password = data.get('password') or password
+                            print(f"Extracted from raw parse: username={username}, password={password}")
+                except Exception as parse_err:
+                    print(f"Failed to parse raw body: {parse_err}")
+            
+            # Try form data as fallback
+            if not username or not password:
+                username = request.form.get('username') or username
+                password = request.form.get('password') or password
+                print(f"After form fallback: username={username}, password={password}")
+            
+            # Sanitize
+            if isinstance(username, str):
+                username = username.strip()
+            if isinstance(password, str):
+                password = password.strip()
+            
+            print(f"Final values: username={username}, password={password}")
+            print(f"=== END DEBUG ===\n")
+            
+            if not username or not password:
+                return jsonify({'error': 'Missing username or password'}), 400
+            
+            user = User.query.filter_by(username=username).first()
+            
+            if not user or not user.check_password(password):
                 return jsonify({'error': 'Invalid credentials'}), 401
             
             if not user.is_active:
@@ -147,7 +203,9 @@ def create_app(config_name=None):
             }), 200
         
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            import traceback
+            traceback.print_exc()
+            return jsonify({'error': f'Server error: {str(e)}'}), 500
     
     @app.route('/api/auth/register', methods=['POST'])
     def register():
