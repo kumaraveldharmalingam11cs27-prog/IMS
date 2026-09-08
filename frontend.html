@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Provigent Inventory</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #1f2937; }
+      .container { max-width: 980px; margin: 0 auto; padding: 24px; }
+      .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 16px; }
+      button, input { font: inherit; padding: 10px 12px; border-radius: 8px; border: 1px solid #d1d5db; }
+      button { background: #2563eb; color: white; border: none; cursor: pointer; }
+      .row { display: flex; gap: 12px; flex-wrap: wrap; }
+      .stat { flex: 1; min-width: 180px; }
+      .muted { color: #6b7280; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { text-align: left; padding: 10px; border-bottom: 1px solid #e5e7eb; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1>Provigent Inventory</h1>
+        <p class="muted">Backend API is available at <a href="http://127.0.0.1:5000/api">http://127.0.0.1:5000/api</a>.</p>
+        <div class="row">
+          <input id="username" placeholder="Username" value="admin" />
+          <input id="password" type="password" placeholder="Password" value="admin123" />
+          <button onclick="login()">Login</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Dashboard</h2>
+        <div id="dashboard" class="row"></div>
+      </div>
+      <div class="card">
+        <h2>Inventory</h2>
+        <table>
+          <thead><tr><th>Item</th><th>SKU</th><th>Qty</th><th>Status</th></tr></thead>
+          <tbody id="inventory"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      let token = null;
+      async function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const res = await fetch('http://127.0.0.1:5000/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.error || 'Login failed');
+          return;
+        }
+        token = data.access_token;
+        loadDashboard();
+        loadInventory();
+      }
+
+      async function loadDashboard() {
+        const res = await fetch('http://127.0.0.1:5000/api/dashboard/stats', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        document.getElementById('dashboard').innerHTML = `
+          <div class="card stat"><h3>Total items</h3><div>${data.total_items ?? 0}</div></div>
+          <div class="card stat"><h3>Inventory value</h3><div>$${data.total_inventory_value ?? 0}</div></div>
+          <div class="card stat"><h3>Low stock</h3><div>${data.low_stock_count ?? 0}</div></div>
+        `;
+      }
+
+      async function loadInventory() {
+        const res = await fetch('http://127.0.0.1:5000/api/inventory?per_page=10', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const rows = (data.items || []).map(item => `
+          <tr>
+            <td>${item.name}</td>
+            <td>${item.sku}</td>
+            <td>${item.current_quantity}</td>
+            <td>${item.status}</td>
+          </tr>
+        `).join('');
+        document.getElementById('inventory').innerHTML = rows;
+      }
+    </script>
+  </body>
+</html>

@@ -1,4 +1,5 @@
 import os
+import random
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -13,7 +14,7 @@ from models import (
 
 
 def seed_default_data():
-    """Create baseline data when the database is empty."""
+    """Create baseline data and enrich the inventory with 150 distinct seeded items."""
     if not Category.query.first():
         categories = [
             Category(name='Raw Materials', description='Raw materials and bulk supplies'),
@@ -43,16 +44,33 @@ def seed_default_data():
         ]
         db.session.add_all(suppliers)
 
-    if not InventoryItem.query.first():
-        categories = Category.query.all()
-        suppliers = Supplier.query.all()
-        items = [
-            InventoryItem(name='Coffee Beans', sku='SKU-001', barcode='1234567890001', category_id=categories[0].id if categories else None, unit='kg', current_quantity=25, min_quantity=10, max_quantity=50, unit_cost=8.50, supplier_id=suppliers[0].id if suppliers else None, location='A1-01'),
-            InventoryItem(name='Paper Cups', sku='SKU-002', barcode='1234567890002', category_id=categories[2].id if len(categories) > 2 else None, unit='box', current_quantity=0, min_quantity=50, max_quantity=200, unit_cost=12.00, supplier_id=suppliers[1].id if len(suppliers) > 1 else None, location='A2-01'),
-            InventoryItem(name='Milk', sku='SKU-003', barcode='1234567890003', category_id=categories[0].id if categories else None, unit='liter', current_quantity=24, min_quantity=10, max_quantity=50, unit_cost=1.50, supplier_id=suppliers[0].id if suppliers else None, location='A1-02'),
-            InventoryItem(name='Sugar', sku='SKU-004', barcode='1234567890004', category_id=categories[0].id if categories else None, unit='kg', current_quantity=18, min_quantity=15, max_quantity=40, unit_cost=0.80, supplier_id=suppliers[2].id if len(suppliers) > 2 else None, location='A1-03'),
-        ]
-        db.session.add_all(items)
+    categories = Category.query.all()
+    suppliers = Supplier.query.all()
+
+    if InventoryItem.query.count() < 150:
+        adjectives = ['Aero', 'Alpine', 'Aurora', 'Bravo', 'Bright', 'Cobalt', 'Coastal', 'Crisp', 'Crystal', 'Delta', 'Dynamic', 'Eco', 'Elite', 'Emerald', 'Express', 'Flex', 'Fresh', 'Fusion', 'Glacier', 'Golden', 'Halo', 'Harbor', 'Helix', 'Horizon', 'Hyper', 'Icon', 'Indigo', 'Lumen', 'Marble', 'Metro', 'Nimbus', 'North', 'Nova', 'Ocean', 'Orbit', 'Peak', 'Pilot', 'Plaza', 'Prime', 'Quartz', 'Ridge', 'River', 'Royal', 'Sage', 'Signal', 'Solar', 'South', 'Spark', 'Summit', 'Swift', 'Terra', 'Trident', 'Urban', 'Velvet', 'Vivid', 'Volt', 'West', 'Zen']
+        nouns = ['Adapter', 'Beacon', 'Bracket', 'Cable', 'Cap', 'Cartridge', 'Case', 'Clamp', 'Clip', 'Coil', 'Connector', 'Controller', 'Cover', 'Crate', 'Cylinder', 'Detector', 'Diverter', 'Drill', 'Filter', 'Gauge', 'Gasket', 'Handle', 'Holder', 'Hose', 'Hub', 'Insert', 'Kit', 'Latch', 'Module', 'Nozzle', 'Panel', 'Piston', 'Plate', 'Pod', 'Pump', 'Rack', 'Rivet', 'Roller', 'Sensor', 'Shield', 'Socket', 'Spacer', 'Spool', 'Spring', 'Switch', 'Valve', 'Vent', 'Wheel', 'Wire']
+        units = ['piece', 'box', 'kg', 'liter', 'roll']
+
+        for index in range(InventoryItem.query.count(), 150):
+            adjective = adjectives[index % len(adjectives)]
+            noun = nouns[(index * 3) % len(nouns)]
+            unit = units[(index + 2) % len(units)]
+            item = InventoryItem(
+                name=f'{adjective} {noun} {index + 1}',
+                sku=f'SKU-{index + 1:03d}',
+                barcode=f'{1000000000000 + index}',
+                category_id=categories[index % len(categories)].id if categories else None,
+                unit=unit,
+                current_quantity=random.randint(0, 300),
+                min_quantity=random.randint(5, 25),
+                max_quantity=random.randint(50, 500),
+                unit_cost=round(random.uniform(0.5, 150.0), 2),
+                supplier_id=suppliers[index % len(suppliers)].id if suppliers else None,
+                location='Chennai',
+                notes='Auto-seeded inventory item',
+            )
+            db.session.add(item)
 
     db.session.commit()
 
@@ -103,18 +121,74 @@ def create_app(config_name=None):
     
     # ==================== AUTHENTICATION ROUTES ====================
     
-    @app.route('/api/auth/login', methods=['POST'])
+    @app.route('/api/auth/login', methods=['POST', 'OPTIONS'])
     def login():
         """User login endpoint"""
+        if request.method == 'OPTIONS':
+            return '', 204
+            
         try:
-            data = request.get_json()
+            import json
             
-            if not data or not data.get('username') or not data.get('password'):
-                return jsonify({'error': 'Missing credentials'}), 400
+            # Debug: Log all request details
+            print(f"\n=== LOGIN REQUEST DEBUG ===")
+            print(f"Content-Type: {request.content_type}")
+            print(f"Is JSON: {request.is_json}")
+            print(f"Method: {request.method}")
+            print(f"Headers: {dict(request.headers)}")
             
-            user = User.query.filter_by(username=data['username']).first()
+            # Get raw body
+            raw_body = request.get_data(as_text=True)
+            print(f"Raw body: {raw_body}")
+            print(f"Raw body length: {len(raw_body)}")
             
-            if not user or not user.check_password(data['password']):
+            username = None
+            password = None
+            
+            # Try to get JSON data
+            if request.is_json:
+                data = request.get_json(silent=True)
+                print(f"get_json() result: {data}")
+                if data and isinstance(data, dict):
+                    username = data.get('username')
+                    password = data.get('password')
+                    print(f"Extracted from get_json: username={username}, password={password}")
+            
+            # If that didn't work, try parsing raw body
+            if not username or not password:
+                try:
+                    if raw_body:
+                        print(f"Attempting to parse raw body as JSON...")
+                        data = json.loads(raw_body)
+                        print(f"Parsed data: {data}")
+                        if isinstance(data, dict):
+                            username = data.get('username') or username
+                            password = data.get('password') or password
+                            print(f"Extracted from raw parse: username={username}, password={password}")
+                except Exception as parse_err:
+                    print(f"Failed to parse raw body: {parse_err}")
+            
+            # Try form data as fallback
+            if not username or not password:
+                username = request.form.get('username') or username
+                password = request.form.get('password') or password
+                print(f"After form fallback: username={username}, password={password}")
+            
+            # Sanitize
+            if isinstance(username, str):
+                username = username.strip()
+            if isinstance(password, str):
+                password = password.strip()
+            
+            print(f"Final values: username={username}, password={password}")
+            print(f"=== END DEBUG ===\n")
+            
+            if not username or not password:
+                return jsonify({'error': 'Missing username or password'}), 400
+            
+            user = User.query.filter_by(username=username).first()
+            
+            if not user or not user.check_password(password):
                 return jsonify({'error': 'Invalid credentials'}), 401
             
             if not user.is_active:
@@ -129,7 +203,9 @@ def create_app(config_name=None):
             }), 200
         
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            import traceback
+            traceback.print_exc()
+            return jsonify({'error': f'Server error: {str(e)}'}), 500
     
     @app.route('/api/auth/register', methods=['POST'])
     def register():
@@ -244,7 +320,7 @@ def create_app(config_name=None):
                 reorder_quantity=data.get('reorder_quantity', 50),
                 unit_cost=data.get('unit_cost'),
                 supplier_id=data.get('supplier_id'),
-                location=data.get('location')
+                location=data.get('location', 'Chennai')
             )
             
             db.session.add(item)
